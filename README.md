@@ -10,13 +10,9 @@ If you find this code or the paper useful, ***please consider citing it***.
 ## Overview
 All of the source code for computing solutions by various methods can be found in src.jl, written in Julia. This code leverages the JuMP Modeling Language and the Gurobi Solver.   
 
-The files:
- - TestMAD.jl
- - TestCV.jl
+The files shapeExperiments.jl calls the relevant workhorse functions to generate the principal plots of the paper.  
 
-call the relevant workhorse functions to generate the principal plots of the paper.  
-
-Finally the folder **plotting** contains functions used to generate plots for the paper, written in R and exported into Tikz.
+Finally the folder **plotting** contains functions used to generate plots for the paper, written in R and exported into Tikz.  
 
 ## Licensing
 
