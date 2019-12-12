@@ -1,17 +1,12 @@
 #lowerBoundsUnimodal
 
-#for the standardized distribution
-#document indexes 0 to N
-function geom_price_ladder(S, delta)
-	N = ceil(Int, 1 + log(S/delta) / log(1 + delta))
-	ps = zeros(N + 1)
-	ps[0 + 1] = 0.
-	ps[1 + 1] = delta
-	ps[N + 1] = S
-	for i = 2:N-1
-		ps[i + 1] = ps[i - 1 + 1] * (1 + delta)
-	end
-	ps
+#Based on Theorem 3
+function lower_bound_unimodal(D, M)
+    if D/M <= 1/3
+        return 1 / (1 - D/M)
+    end
+
+    return 8D / M / (1 + D/M )^2
 end
 
 ####
@@ -135,7 +130,6 @@ end
 
 
 #####################
-
 
 #computes the maximum over the geometric grid
 #sep_1(a, b, l, u) solves  min_{t in [l, u]}  a H(t) + b t
@@ -360,11 +354,20 @@ function _rev_p_lb_unimodal_case3(S, mode, h, sep_1, sep_2, H, H_un, pj, numCuts
 	return -1.
 end
 
-function vopp_lb_unimodal_MAD(mu, S, M, D, mode; delta = S/100, numCuts=100, print_trace=false, TOL=1e-6)
+#safe_fail forces a return of -1 if D seems infeasible
+function vopp_lb_unimodal_MAD(mu, S, M, D, mode; delta = S/100, numCuts=100, print_trace=false, TOL=1e-6, safe_fail=false)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
 	mode_c = (mode - c) / (mu - c)
+
+	if D/M > .25 
+		println("Deviation $D > .25, problem likely infeasible")
+		if safe_fail 
+			println("Safe_fail set to true. Aborting Calc")
+			return -1.0
+		end
+	end
 
 	#create the separators
 	h(t) = M/2 * abs(t-1) - D

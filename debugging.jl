@@ -105,7 +105,7 @@ function _low_bnd_primal_unimodal_MAD(mu, S, M, D, mode; N=1000)
 			dist[:] = getvalue(probMs)
 		end
 	end #end loop over prices
-	return 1/r_mp, best_price, dist
+	return 1/r_mp, best_price, t_grid, dist
 end
 
 #NOTE:  Worst-Case distribution is a dirac at 0 (which is mode) and a uniform <0, S>

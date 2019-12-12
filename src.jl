@@ -8,13 +8,11 @@ module vopp
 
 using JuMP, Gurobi, Ipopt, LinearAlgebra, QuadGK, Roots
 
-
 include("Helpers.jl")
 include("debugging.jl")
 include("upperBounds.jl")
 include("UpperBoundsSymmetric.jl")
 include("UpperBoundsUnimodal.jl")
-include("lowerBounds.jl")
 include("lowerBoundsSymmetric.jl")
 include("lowerBoundsUnimodal.jl")
 

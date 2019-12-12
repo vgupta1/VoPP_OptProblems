@@ -31,28 +31,39 @@ function addRQ!(m, a, b, c, l, u)
     @constraint(m, c + l * u * (y1 - a) - y >= 0)
 end
 
-
-#Based on Theorem 3
-function lower_bound_unimodal(D, M)
-    if D/M <= 1/3
-        return 1 / (1 - D/M)
-    end
-
-    return 8D / M / (1 + D/M )^2
-end
-
-
 #conjecture that maximal CV occurs for uniform distribution among unimodals
 #Not formally proven
-function max_cv_unimodal_guess(mu, S, M, mode)
+function max_std_cv_unimodal_guess(mu, S, M, isSym)
     #convert to standardized distribution
     c = mu * (1 - M)
     Sc = vopp.comp_Sc(S, M)
-    mode_c = (mode - c) / (mu - c)
 
-    if Sc < 2  #Unif[2-Sc, Sc]
-        return Sc / sqrt(12)
-    else
-        return 2 / sqrt(12)
+    #adjust for symmetry if needed
+    if isSym 
+        if Sc > 2 
+            Sc = 2
+        end
+        if Sc < 2 
+            lb = 2 - Sc
+        else
+            lb = 0
+        end
     end
+
+    return 2 / sqrt(12) * (Sc - lb) / (Sc + lb)
+end
+
+
+#for the standardized distribution
+#document indexes 0 to N
+function geom_price_ladder(S, delta)
+    N = ceil(Int, 1 + log(S/delta) / log(1 + delta))
+    ps = zeros(N + 1)
+    ps[0 + 1] = 0.
+    ps[1 + 1] = delta
+    ps[N + 1] = S
+    for i = 2:N-1
+        ps[i + 1] = ps[i - 1 + 1] * (1 + delta)
+    end
+    ps
 end
