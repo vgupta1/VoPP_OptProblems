@@ -19,7 +19,7 @@ end
 #helper function for a robust (indefinite) quadratic  
 #ax^2 + bx +c >= 0 for all x in [l, u]
 #adds everything to model m
-function addRQ!(m, a, b, c, l, u)
+function _addRQ!(m, a, b, c, l, u)
     y1 = @variable(m)  #theta
     @constraint(m, y1 >= 0)
     y = @variable(m)    #t

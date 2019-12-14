@@ -7,7 +7,7 @@
 #Uses a discretization in the primal space
 #h is a 1D function defining moment constraint for the original problem 
 #S, M, mu are the original parameters
-function _vopp_moment_primal(S, M, mu, h; N=1000)
+function _vopp_ub_primal(S, M, mu, h; N=1000)
 	#translate everything to the Vc space
 	c = mu * (1 - M)
 	hbar(t) = h((mu - c) * t + c)
@@ -35,7 +35,7 @@ end
 
 #Uses a discretization in the primal space of rectangular distributions
 #S, M, mu, mode are the original parameters of NON-standardized dist
-function _low_bnd_primal_unimodal_MAD(mu, S, M, D, mode; N=1000)
+function _vopp_lb_primal_unimodal_MAD(mu, S, M, D, mode; N=1000)
 	#convert to standardized distribution
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
@@ -113,6 +113,7 @@ end
 #returns maximum coef of dev, mode and also the mixture distribution
 #recall all mixtures written as <t, m> uniforms
 #Inputs should be normalized
+##VG Possibly Deprecate?
 function max_D_unimodal(S; N=100)
 	t_grid = range(0, stop=S, length=N)
 
@@ -160,7 +161,7 @@ end
 
 #Uses a discretization in the primal space of rectangular distributions
 #S, M, mu, mode are the original parameters of NON-standardized dist
-function _low_bnd_primal_unimodal_CV(mu, S, M, C, mode; N=1000, price=-1)
+function _vopp_lb_primal_unimodal_CV(mu, S, M, C, mode; N=1000, price=-1)
 	#convert to standardized distribution
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)

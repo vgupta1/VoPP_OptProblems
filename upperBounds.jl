@@ -117,16 +117,16 @@ end
 # Not using separation.
 # Algorithm relies on fact that minimizers are always at endpt or 1.    
 ####
-function vopp_MAD(S, M, D; N = 500)
+function vopp_ub_MAD(S, M, D; N = 500)
 	#Solve the two cases for lambda2
-	val_neg = _vopp_MAD(S, M, D, false, N)
-	val_pos = _vopp_MAD(S, M, D, true, N)
+	val_neg = _vopp_ub_MAD(S, M, D, false, N)
+	val_pos = _vopp_ub_MAD(S, M, D, true, N)
 
 	#take minimum bc we already took reciprocals
 	min(val_neg, val_pos), val_neg, val_pos
 end
 
-function _vopp_MAD(S, M, D, is_lam2_pos, N)
+function _vopp_ub_MAD(S, M, D, is_lam2_pos, N)
 	Sc = comp_Sc(S, M)
 	@assert isfinite(Sc) "Currenty only supports finite Sc"
 
@@ -165,7 +165,7 @@ end
 # useSep determines use separator or else Reformulation 
 # Notice that the minimizer is not always at 1 because of linear offset
 #Weirdly slow for some reason.  
-function vopp_CV(S, M, mu, C; method=:Slemma, N=500, numCuts=100, TOL=1e-6, print_trace=false)
+function vopp_ub_CV(S, M, mu, C; method=:ConstraintGeneration, N=500, numCuts=100, TOL=1e-6, print_trace=false)
 	if method == :Slemma
 		return _vopp_CV_SLemma(S, M, mu, C, N)
 	elseif method == :ConstraintGeneration
@@ -173,13 +173,13 @@ function vopp_CV(S, M, mu, C; method=:Slemma, N=500, numCuts=100, TOL=1e-6, prin
 		sep_fun(a, b, lam1, lam2, M, mu) = sep_CV(a, b, lam1, lam2, M, C)
 		return _vopp_moment_dual(S, M, mu, h, sep_fun, N=N, numCuts=numCuts, TOL=TOL, print_trace=print_trace)
 	elseif method == :Reformulation
-		return min( _vopp_CV(S, M, mu, C, true, N), _vopp_CV(S, M, mu, C, false, N) )
+		return min( _vopp_ub_CV(S, M, mu, C, true, N), _vopp_ub_CV(S, M, mu, C, false, N) )
 	else
 		throw("Method must be one of :Slemma , :ConstraintGeneration , :Reformulation")
 	end
 end
 
-function _vopp_CV(S, M, mu, C, is_lam2_pos, N=500)
+function _vopp_ub_CV(S, M, mu, C, is_lam2_pos, N=500)
 	#translate everything to the Vc space
 	hbar(t) = M^2 * (t - 1)^2 - C^2  ##This functional form implicitly coded into dual constraints
 	Sc = vopp.comp_Sc(S, M)
@@ -288,19 +288,19 @@ end
 
 ### Specialized function for BM
 # useSep determines use separator or else Reformulation 
-function vopp_GM(S, M, mu, B; useSep=false, N=500, numCuts=100, TOL=1e-6, print_trace=false)
+function vopp_ub_GM(S, M, mu, B; useSep=false, N=500, numCuts=100, TOL=1e-6, print_trace=false)
 	if useSep 
 		h(v) = -log(v/mu) + log(B/mu)
 		sep_fun(a, b, lam1, lam2, M, mu) = sep_GM(a, b, lam1, lam2, M, mu, B)
 		return _vopp_moment_dual(S, M, mu, h, sep_fun, N=N, numCuts=numCuts, TOL=TOL, print_trace=print_trace)
 	end
-	return min( _vopp_GM(S, M, mu, B, true, N), _vopp_GM(S, M, mu, B, false, N) )
+	return min( _vopp_ub_GM(S, M, mu, B, true, N), _vopp_ub_GM(S, M, mu, B, false, N) )
 end
 
 ### Specialized function for GM using convex conjugates
 #uses a combination of IPOPT and prayer. 
 #h(t) = -log(t/mu) + log(B/mu)
-function _vopp_GM(S, M, mu, B, is_lam2_pos, N)
+function _vopp_ub_GM(S, M, mu, B, is_lam2_pos, N)
 	#translate everything to the Vc space
 	hbar(t) = -log(M*t + 1- M) + log(B/mu)  ##This functional form implicitly coded into dual constraints
 

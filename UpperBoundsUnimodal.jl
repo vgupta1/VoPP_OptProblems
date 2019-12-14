@@ -107,7 +107,7 @@ function _vopp_unimodal(S, mode, h, H, sep_fun; N = 100, numCuts=100, TOL=1e-6, 
 	return -1.
 end
 
-function vopp_MAD_unimodal(mu, S, M, D, mode; numCuts=100, N=100, print_trace=false)
+function vopp_ub_unimodal_MAD(mu, S, M, D, mode; numCuts=100, N=100, print_trace=false)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
@@ -158,7 +158,7 @@ function vopp_MAD_unimodal(mu, S, M, D, mode; numCuts=100, N=100, print_trace=fa
 end
 
 
-function vopp_CV_unimodal(mu, S, M, C, mode; N=100, numCuts=500, print_trace=false)
+function vopp_ub_unimodal_CV(mu, S, M, C, mode; N=100, numCuts=500, print_trace=false)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)

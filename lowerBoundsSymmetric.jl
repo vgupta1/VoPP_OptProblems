@@ -138,5 +138,89 @@ function vopp_lb_symmetric_MAD(mu, S, M, D; delta = S/100, numCuts=100, print_tr
 end
 
 
+function vopp_lb_symmetric_CV(mu, S, M, C; delta = S/100, numCuts=100, print_trace=false, TOL=1e-6, pj=-1, safe_fail=false)
+	#standardize
+	c = mu * (1 - M)
+	Sc = vopp.comp_Sc(S, M)
+
+	#round down Sc if it's too large and throw otherwise
+	Sc = min(Sc, 2)
+	@assert Sc > 1 "Scale $S is too small for any distribution"
+
+	max_cv = max_std_cv_unimodal_guess(1, Sc, M, true) 
+	if  C / M > max_cv
+		println("CV $C > $max_cv, so problem likely infeasible")
+		if safe_fail 
+			println("Safe_fail set to true. Aborting Calc")
+			return -1.0
+		end
+	end
+
+	#create the functions/separators closed-form
+	h(t) = M^2 * (t-1)^2 - C^2
+	H(t) = M^2 / 3 * t^2 - C^2
+	H_un(t) = 2t * H(t)
+
+	#sep_1(a, b, l, u) solves  
+	#min_{t in [l, u]}  at + b * H_un(t)
+	function sep_1(a, b, l, u)
+		f(t) = a * t + 2 * b * M^2 / 3 * t^3 - 2b * t * C^2
+		valstar, tstar = f(l), l
+		if f(u) < valstar
+			valstar, tstar = f(u), u
+		end
+		if (2b * C^2 - a) / (2b * M^2) > 0 
+			tmid = sqrt((2b * C^2 - a) / (2b * M^2))
+			valmid = Inf
+			if l <= tmid <= u 
+				valmid = f(tmid)
+			end
+			if valmid < valstar
+				valstar, tstar = valmid, tmid
+			end
+		end
+		valstar, tstar
+	end
+	
+	#solves min_{t in [l, u]} a H(t)
+	function sep_2(a, l, u)
+		f(t) = a * H(t)
+		tstar, valstar = l, f(l)
+		if f(u) < valstar
+			tstar, valstar = u, f(u)
+		end
+		if l <= 0. <= u
+			if f(0) < valstar
+				tstar, valstar = 0., f(0.)
+			end
+		end
+		return valstar, tstar
+	end
+
+	#search over the geometric price ladder
+	if pj > 0
+		ps = [pj]
+	else
+		ps = geom_price_ladder(Sc, delta)
+	end
+	rstar = -Inf
+	pstar = 0. 
+	rj = 0.
+
+	for pj in ps
+		#kick i tto the workhorse
+		rj = _rev_p_lb_symmetric(Sc, h, sep_1, sep_2, H, H_un, pj, numCuts, print_trace, TOL)
+		print_trace && println("\n Price Pj:\t", pj, "\t", "Rj:\t", rj, "\n")
+
+		if rj > rstar
+			rstar = rj 
+			pstar = pj
+		end
+	end
+
+	return 1/rstar, pstar	
+end
+
+
 
 

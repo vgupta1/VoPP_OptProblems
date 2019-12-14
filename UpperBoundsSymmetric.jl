@@ -67,7 +67,7 @@ end
 
 
 #exposed function for MAD
-function vopp_sym_unimodal_MAD(mu, S, M, D, mode; numCuts=100, N=100, print_trace=false, TOL=1e-6)
+function vopp_ub_symmetric_MAD(mu, S, M, D, mode; numCuts=100, N=100, print_trace=false, TOL=1e-6)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
@@ -130,7 +130,7 @@ function vopp_sym_unimodal_MAD(mu, S, M, D, mode; numCuts=100, N=100, print_trac
 end
 
 
-function vopp_sym_unimodal_CV(mu, S, M, C, mode; TOL=1e-6, N=100, numCuts=500, print_trace=false)
+function vopp_ub_symmetric_CV(mu, S, M, C, mode; TOL=1e-6, N=100, numCuts=500, print_trace=false)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)

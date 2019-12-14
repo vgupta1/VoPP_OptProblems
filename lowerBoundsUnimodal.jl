@@ -1,7 +1,7 @@
 #lowerBoundsUnimodal
 
 #Based on Theorem 3
-function lower_bound_unimodal(D, M)
+function _lower_bound_unimodal(D, M)
     if D/M <= 1/3
         return 1 / (1 - D/M)
     end
@@ -130,7 +130,6 @@ end
 
 
 #####################
-
 #computes the maximum over the geometric grid
 #sep_1(a, b, l, u) solves  min_{t in [l, u]}  a H(t) + b t
 #sep_2(a, b, c, l, u) solves min_{t in [l, u]} a t^2 + b t + c int_{t,m} h 
@@ -355,7 +354,8 @@ function _rev_p_lb_unimodal_case3(S, mode, h, sep_1, sep_2, H, H_un, pj, numCuts
 end
 
 #safe_fail forces a return of -1 if D seems infeasible
-function vopp_lb_unimodal_MAD(mu, S, M, D, mode; delta = S/100, numCuts=100, print_trace=false, TOL=1e-6, safe_fail=false)
+function vopp_lb_unimodal_MAD(mu, S, M, D, mode; 
+			method=:Opt, delta = S/100, numCuts=100, print_trace=false, TOL=1e-6, safe_fail=false)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
@@ -367,6 +367,13 @@ function vopp_lb_unimodal_MAD(mu, S, M, D, mode; delta = S/100, numCuts=100, pri
 			println("Safe_fail set to true. Aborting Calc")
 			return -1.0
 		end
+	end
+
+	if method == :Formula
+		return _lower_bound_unimodal(D, M)
+	end
+	if method != :Opt
+		throw("Method must be one of :Opt or :Formula")
 	end
 
 	#create the separators
