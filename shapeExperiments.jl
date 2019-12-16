@@ -61,10 +61,10 @@ function runCVExp(file_out_name;
 		t = @elapsed bound = vopp.vopp_ub_symmetric_CV(mu, S, M, C, mode)
 		writedlm(f, [C "Symmetric" false bound t])
 
-		t = @elapsed bound = vopp.vopp_lb_unimodal_CV(mu, S, M, C, mode)
+		t = @elapsed bound = vopp.vopp_lb_unimodal_CV(mu, S, M, C, mode)[1]
 		writedlm(f, [C "Unimodal" true bound t])
 
-		t = @elapsed bound = vopp.vopp_lb_symmetric_CV(mu, S, M, C, safe_fail=true)
+		t = @elapsed bound = vopp.vopp_lb_symmetric_CV(mu, S, M, C, safe_fail=true)[1]
 		writedlm(f, [C "Symmetric" true bound t])
 
 		flush(f)
