@@ -18,6 +18,9 @@ function runMADExp(file_out_name;
 	writedlm(f, ["Dev" "Shape" "isLB" "Bound" "Time"])
 
 	for dev in dev_grid
+		#Dumb bound for plotting ease.
+		writedlm(f, [dev "None" true 1.0 0.])
+
 		t = @elapsed bound = vopp.vopp_ub_MAD(S, M, dev)[1]
 		writedlm(f, [dev "None" false bound t])
 
@@ -52,6 +55,9 @@ function runCVExp(file_out_name;
 	writedlm(f, ["CV" "Shape" "isLB" "Bound" "Time"])
 
 	for C in cv_grid
+		#add a dumb bound for ease in plotting
+		writedlm(f, [C "None" true 1.0 0.])
+
 		t = @elapsed bound = vopp.vopp_ub_CV(S, M, mu, C)
 		writedlm(f, [C "None" false bound t])
 
