@@ -35,7 +35,7 @@ end
 
 #Uses a discretization in the primal space of rectangular distributions
 #S, M, mu, mode are the original parameters of NON-standardized dist
-function _vopp_lb_primal_unimodal_MAD(mu, S, M, D, mode; N=1000)
+function _vopp_lb_primal_unimodal_MAD(mu, S, M, D, mode; N=1000, pj=-1)
 	#convert to standardized distribution
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
@@ -81,7 +81,14 @@ function _vopp_lb_primal_unimodal_MAD(mu, S, M, D, mode; N=1000)
 	r_mp = -Inf
 	best_price = -Inf
 	dist = zero(t_grid)
-	for p in t_grid
+
+	if pj < 0
+		p_grid = t_grid[:] 
+	else
+		p_grid = [pj]
+	end
+
+	for p in p_grid
 		m = Model(solver=GurobiSolver(OutputFlag=0))
 		@variable(m, probMs[1:N] >= 0)
 		@constraint(m, sum(probMs) == 1)  #normalization
@@ -242,4 +249,5 @@ function max_cv_unimodal_guess(mu, S, M, mode)
 		return 2 / sqrt(12)
 	end
 end
+
 

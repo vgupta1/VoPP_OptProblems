@@ -134,7 +134,7 @@ end
 #sep_1(a, b, l, u) solves  min_{t in [l, u]}  a H(t) + b t
 #sep_2(a, b, c, l, u) solves min_{t in [l, u]} a t^2 + b t + c int_{t,m} h 
 #user must ensure sep_1, sep_2 and h are consistent.
-function _vopp_lb_unimodal_(S, mode, h, delta, sep_1, sep_2, numCuts, TOL, print_trace)
+function _vopp_lb_unimodal_(S, mode, h, delta, sep_1, sep_2, numCuts, TOL, print_trace, ps)
 	#Integrated functions
 	function H_un(t)
 		if min(mode, t) <= 1 <= max(mode, t)
@@ -145,8 +145,6 @@ function _vopp_lb_unimodal_(S, mode, h, delta, sep_1, sep_2, numCuts, TOL, print
 	end
 	H(t) = t == mode ? h(mode) : H_un(t) / (mode - t)
 
-	#search over the a geometric price ladder
-	ps = geom_price_ladder(S, delta)
 	rstar = -Inf
 	pstar = 0. 
 	rj = 0.
@@ -355,7 +353,7 @@ end
 
 #safe_fail forces a return of -1 if D seems infeasible
 function vopp_lb_unimodal_MAD(mu, S, M, D, mode; 
-			method=:Opt, delta = S/100, numCuts=100, print_trace=false, TOL=1e-6, safe_fail=false)
+			method=:Opt, delta = S/100, numCuts=100, print_trace=false, TOL=1e-6, safe_fail=false, pj = -1)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
@@ -382,11 +380,18 @@ function vopp_lb_unimodal_MAD(mu, S, M, D, mode;
 	sep_1(a, b, l, u) = _sep_LB_Unimodal_1(h, H, a, b, mode_c, l, u)
 	sep_2(a, b, c, l, u) = _sep_LB_Unimodal_MAD_2(M, D, a, b, c, mode_c, l, u)
 
+	if pj > 0
+		ps = [pj]
+	else
+		#search over the a geometric price ladder
+		ps = geom_price_ladder(S, delta)
+	end
+
 	#kick it to the workhorse
-	_vopp_lb_unimodal_(Sc, mode_c, h, delta, sep_1, sep_2, numCuts, TOL, print_trace)
+	_vopp_lb_unimodal_(Sc, mode_c, h, delta, sep_1, sep_2, numCuts, TOL, print_trace, ps)
 end
 
-function vopp_lb_unimodal_CV(mu, S, M, C, mode; delta = S/100, numCuts=100, print_trace=false, TOL=1e-6)
+function vopp_lb_unimodal_CV(mu, S, M, C, mode; delta = S/100, numCuts=100, print_trace=false, TOL=1e-6, pj = -1)
 	#standardize
 	c = mu * (1 - M)
 	Sc = vopp.comp_Sc(S, M)
@@ -396,6 +401,13 @@ function vopp_lb_unimodal_CV(mu, S, M, C, mode; delta = S/100, numCuts=100, prin
 		println("Warning:  Desired Coeff of Variation might exceed max-possible for uniform distributions.")
 	end
 
+	if pj > 0
+		ps = [pj]
+	else
+		#search over the a geometric price ladder
+		ps = geom_price_ladder(S, delta)
+	end
+
 	#create the separators
 	h(t) = M^2 * (t - 1)^2 - C^2
 	H(t) = mode_c == t ? h(mode_c) : quadgk(h, t, mode_c)[1] / (mode_c - t)
@@ -403,7 +415,7 @@ function vopp_lb_unimodal_CV(mu, S, M, C, mode; delta = S/100, numCuts=100, prin
 	sep_2(a, b, c, l, u) = _sep_LB_Unimodal_CV_2(M, C, a, b, c, mode_c, l, u)
 
 	#kick it to the workhorse
-	_vopp_lb_unimodal_(Sc, mode_c, h, delta, sep_1, sep_2, numCuts, TOL, print_trace)
+	_vopp_lb_unimodal_(Sc, mode_c, h, delta, sep_1, sep_2, numCuts, TOL, print_trace, ps)
 end
 
 

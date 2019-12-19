@@ -136,6 +136,12 @@ function vopp_ub_symmetric_CV(mu, S, M, C, mode; TOL=1e-6, N=100, numCuts=500, p
 	Sc = vopp.comp_Sc(S, M)
 	mode_c = (mode - c) / (mu - c)
 
+	@assert Sc >= 1 "S is too small for given mean.  Problem infeasible."
+	if Sc > 2
+		#just silently round down for now
+		Sc = 2
+	end
+
 	#create subfunctions
 	h(t) = M^2 * (t - 1)^2 - C^2
 
