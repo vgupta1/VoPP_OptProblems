@@ -117,7 +117,7 @@ end
 # Not using separation.
 # Algorithm relies on fact that minimizers are always at endpt or 1.    
 ####
-function vopp_ub_MAD(S, M, D; N = 500)
+function vopp_ub_MAD_opt(S, M, D; N = 500)
 	#Solve the two cases for lambda2
 	val_neg = _vopp_ub_MAD(S, M, D, false, N)
 	val_pos = _vopp_ub_MAD(S, M, D, true, N)

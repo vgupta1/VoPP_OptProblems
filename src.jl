@@ -8,8 +8,10 @@ module vopp
 
 using JuMP, Gurobi, Ipopt, LinearAlgebra, QuadGK, Roots
 
+include("LambertW.jl")
 include("Helpers.jl")
-include("debugging.jl")
+include("closedFormUB.jl")
+#include("debugging.jl")
 include("upperBounds.jl")
 include("UpperBoundsSymmetric.jl")
 include("UpperBoundsUnimodal.jl")

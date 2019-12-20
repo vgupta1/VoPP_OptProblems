@@ -4,7 +4,7 @@ library(stringr)
 library(tikzDevice)
 library(forcats)
 
-dat = read_tsv("Results/")
+dat = read_tsv("Results/outMAD__2_1_1_1.tab")
 
 dat %>% group_by(Shape, isLB) %>%
   summarize(avg = mean(Time))
