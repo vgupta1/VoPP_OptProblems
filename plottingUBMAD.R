@@ -4,7 +4,7 @@ library(stringr)
 library(tikzDevice)
 library(forcats)
 
-#simple plots for the upper bound theorems
+#simple plots for the upper bound MAD theorems
 
 dat = read_tsv("Results/simplePlot__4_1_100.tab")
 
