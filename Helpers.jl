@@ -67,3 +67,19 @@ function geom_price_ladder(S, delta)
     end
     ps
 end
+
+
+vopp_ub_scale(S, M) = -lambertw(-M / exp(1) / (S + M - 1))
+
+#assumes standardized
+function tight_dist_ub_scale(x, S)
+    alpha = 1/vopp_ub_scale(S, 1)
+    if 0 <= x <= alpha
+        return 1.
+    elseif x <= S
+        return alpha / x
+    else
+        return 0.
+    end
+    return -1.
+end

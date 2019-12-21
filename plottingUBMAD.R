@@ -81,8 +81,8 @@ dat = read_tsv("tempContour__2_11_100.tab")
 dat = read_tsv("tempContour__1.1_4_100.tab")
 
 #create a set of custom breaks that includes exp(1) for MHR
-bks <- c(1.25, 1.5, exp(1), 3, 3.5, 5)
-bks <- sort(bks)
+bks <- c(1.25, 1.5, 2, exp(1), 3, 3.5)
+labs <- c("1.25", "1.50", "2.00", "e", "3.00", "3.50")
 
 g <- ggplot() +
   stat_contour(data=dat, 
@@ -90,31 +90,13 @@ g <- ggplot() +
                    linetype= factor(..level.. == exp(1), levels = c(F, T) ), 
                    color= factor(..level..)),  
                     breaks=bks) + 
-  theme_bw(base_size = 6) + 
+  scale_color_discrete(labels = labs) + 
+    theme_bw(base_size = 6) + 
   theme(legend.title=element_blank(), 
         legend.text=element_text(size=6)) +
   scale_linetype_discrete(guide=FALSE) + 
   xlab("Coefficient of Deviation $D$") +
   ylab("Scale $S$")
-
-#try to manually label with geom_text
-tmp <- ggplot_build(g)$data[[1]]
-unique(tmp$level)
-filter(tmp, level < 1.01, level > .99) %>% select(x, y, level) %>% filter(y > 9.5)
-
-dat.labels <- tribble(
-  ~x, ~y, ~level,
-  0.88277551, 9, 1.67, 
-  0.8373725, 10, 2.33, 
-  0.2642224, 9, 2.72, 
-  0.3004338, 10, "3.00",
-  0.3729097, 9, 3.67, 
-  0.4308003, 10, 4.33
-)
- 
-g<- g + geom_text(data=dat.labels, aes(x, y, label=level), 
-              size=1.25)
-
 
 
 tikzDevice::tikz(file = "../../TeX/VoPP/Figures/contourPlot.tex", width=2, height=4/6 * 2 )

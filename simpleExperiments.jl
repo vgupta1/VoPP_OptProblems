@@ -40,8 +40,27 @@ function contour_plot(file_out_name;
 	close(f)
 end
 
+function scale_bound_dist(file_out_name; S=4, N=100)
+	#Create file_out and header
+	outPath = "$(file_out_name)__$(S)_$(N)"
+	f = open("$(outPath).tab", "w")
+	writedlm(f, ["x" "Fbar"])
+
+	x_grid = range(0, stop=S, length=N)
+	alpha = 1/vopp_ub_scale(S, 1)
+	push!(x_grid, alpha)
+	sort!(x_grid)
+
+	for x in x_grid
+		writedlm(f, [x vopp.tight_dist_ub_scale(x, S)])
+	end
+	close(f)
+end
+
 if ARGS[1] == "Simple"
 	simplePlot(ARGS[2])
 elseif ARGS[1] == "Contour"
 	contour_plot(ARGS[2])
+elseif ARGS[1] == "scale_tight_dist"
+	scale_bound_dist(ARGS[2])
 end
