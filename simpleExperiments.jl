@@ -86,7 +86,7 @@ end
 
 
 function scale_bound_vary_ratio(file_out_name; xmin=.1, xmax=1, N=100)
-#Create file_out and header
+	#Create file_out and header
 	outPath = "$(file_out_name)__$(xmin)_$(xmax)"
 	f = open("$(outPath).tab", "w")
 	writedlm(f, ["x" "Bound"])
@@ -98,6 +98,35 @@ function scale_bound_vary_ratio(file_out_name; xmin=.1, xmax=1, N=100)
 	close(f)
 end
 
+
+function plot_tight_distns(file_out_name; S=4, N=100)
+	#Create file_out and header
+	outPath = "$(file_out_name)__$(S)_$(N)"
+	f = open("$(outPath).tab", "w")
+	writedlm(f, ["x" "Low" "Med" "High"])
+
+	dl = vopp.delta_l(S)/2 
+	dm = (vopp.delta_m(S) + vopp.delta_l(S))/2
+	dh = (vopp.delta_m(S) + vopp.delta_h(S))/2
+
+	println("Devs $dl \t $dm \t $dh")
+	#add the weird poitns to make plots better
+	x_grid = collect(range(0, stop=S, length=N))
+	push!(x_grid, 1.)
+	push!(x_grid, 1e-10)
+	push!(x_grid, 1/vopp.vopp_ub_MAD(S, 1., dl))
+	push!(x_grid, exp(1) * S^(1- 1/dm))
+	push!(x_grid, 1/vopp.vopp_ub_MAD(S, 1., dh) / (1 - dh))
+	sort!(x_grid)
+
+	for x in x_grid
+		Fl = vopp.tight_dist_ub_MAD(x, S, dl)
+		Fm = vopp.tight_dist_ub_MAD(x, S, dm)
+		Fh = vopp.tight_dist_ub_MAD(x, S, dh)
+		writedlm(f, [x Fl Fm Fh])
+	end
+	close(f)
+end
 
 if ARGS[1] == "Simple"
 	simplePlot(ARGS[2])
@@ -111,4 +140,6 @@ elseif ARGS[1] == "scale_vary_M"
 	scale_bound_vary_M(ARGS[2])
 elseif ARGS[1] == "scale_vary_ratio"
 	scale_bound_vary_ratio(ARGS[2])
+elseif ARGS[1] == "MAD_tight_dist"
+	plot_tight_distns(ARGS[2])
 end

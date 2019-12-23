@@ -14,7 +14,7 @@ function _vopp_ub_MAD_cf(S, D)
 	elseif D <= delta_h(S)
 		return -lambertw( -exp(-1) / S / (1 - D) )
 	else
-		throw("D $D is too large for Scale $S.  Infeasible")
+		throw("D $D < $(delta_h(S)) is too large for Scale $S.  Infeasible")
 	end
 	return -1.
 end
@@ -30,3 +30,43 @@ function vopp_ub_MAD(S, M, D; method = :ClosedForm)
 	end
 	return -1.
 end
+
+#assumes things already standardized
+function tight_dist_ub_MAD(x, S, D)
+	alpha = 1/vopp_ub_MAD(S, 1., D)
+	#match which regime 
+	if 0 <= D <= delta_l(S)  #low heterogeneity
+		if x <= alpha 
+			return 1.
+		elseif x <= 1
+			return alpha / x
+		elseif x <= S
+			return D / log(S) / x
+		else
+			return 0.
+		end
+	elseif D <= delta_m(S)  #medium
+		if x == 0 
+			return 1
+		elseif x <= exp(1) * S^(1 - 1/D)
+			return alpha / exp(1) * S^(1/D - 1)
+		elseif x <= S
+			return alpha / x
+		else
+			return 0.
+		end
+	elseif D <= delta_h(S) #high
+		if x == 0 
+			return 1.
+		elseif x <= alpha/(1-D)
+			return 1 - D
+		elseif x <= S
+			return alpha / x
+		else
+			return 0.
+		end	
+	else
+		throw("D not valid; $D not in [0, $(delta_h(S))")
+	end
+end
+

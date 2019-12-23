@@ -14,6 +14,7 @@ function lambertw_ub(z)
 	-1 - sqrt(2 * log(1/x)) - 2 * log(1/x) / 3
 end
 
+#the -1 branch
 function lambertw(x)
 	@assert -exp(-1) <= x <= 0 "Lambertw only defined on [-1/e, 0] : $x"
 	#use the Chaterizighou bound to get a guesstimate
@@ -21,3 +22,5 @@ function lambertw(x)
 	f(z) = z * exp(z) - x
 	find_zero(f, (lb, -1.)) 
 end
+
+
