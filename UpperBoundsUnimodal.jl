@@ -1,10 +1,5 @@
 #UpperBoundsUnimodal.jl
 
-#For a fixed (given) mode, class of distributions is convex so you get a tight bound
-#Otherwise non-convex, so you get bounds that are not tight.  
-#Develop bounds for both the fixed mode case and cases based
-#on Michael's proof.
-
 #####
 #Function assumes that we have already translated to V_c space
 ###
@@ -207,6 +202,146 @@ function vopp_ub_unimodal_CV(mu, S, M, C, mode; N=100, numCuts=500, print_trace=
 		end
 		return val, tstar
 	end
+
+	#Now kick it off!	   
+	return _vopp_unimodal(Sc, mode_c, h, H, sep_fun, N=N, numCuts=numCuts, print_trace=print_trace)
+end
+
+function vopp_ub_unimodal_GM(mu, S, M, B, mode; N=100, numCuts=500, print_trace=false)
+	#standardize
+	c = mu * (1 - M)
+	Sc = vopp.comp_Sc(S, M)
+	mode_c = (mode - c) / (mu - c)
+
+	#create subfunctions
+	h(t) = -log(M * t + 1 - M) + log(B/mu)
+
+	#H(t) = int_[t, mode_c] h
+	function H(t)
+		quadgk(h, t, 1, mode_c)[1]
+	end
+
+	#return maximizers of 
+	#max_{[pk, pk_p]}  at + bt^2 + c H(t)
+	function sep_fun(a, b, c, mode, pk, pk_p)
+		obj(t) = a * t + b * t^2 + c * H(t)
+		val_k = obj(pk)
+		val_k_p = obj(pk_p)
+
+		tstar, val = 0., 0.
+		if val_k > val_k_p
+			tstar, val = pk, val_k
+		else
+			tstar, val = pk_p, val_k_p
+		end
+
+		#handle degenerate case where c == 0
+		if c == 0.
+			tp = -a/2/b		
+			if pk <= tp <= pk_p
+				valp = obj(tp)
+				if valp >= val
+					tstar, val = tp, valp
+				end
+			end
+			return val, tstar
+		end
+
+		#else real work to be done
+		inner = 2b/c * B/mu / M
+    	inner *= exp( 2b/c * (1/M - 1) - a/c)
+
+    	if inner < -1/MathConstants.e
+    		tp = pk - 1
+    	else
+    		if inner < 0. ##two solutions.  Need to check -1 branch
+				tp = 1- 1/M + c/2b * vopp.lambertw(inner)     		
+				if pk <= tp <= pk_p
+					valp = obj(tp)
+					if valp >= val
+						tstar, val = tp, valp
+					end
+				end
+			end
+			#always check principal branch
+			tp= 1- 1/M + c/2b * vopp.lambertw0(inner) 
+		end
+
+		if pk <= tp <= pk_p
+			valp = obj(tp)
+			if valp >= val
+				tstar, val = tp, valp
+			end
+		end
+
+		return val, tstar
+	end
+
+	#Now kick it off!	   
+	return _vopp_unimodal(Sc, mode_c, h, H, sep_fun, N=N, numCuts=numCuts, print_trace=print_trace)
+end
+
+
+function vopp_ub_unimodal_IC(mu, S, M, phat, q, mode; N=100, numCuts=500, print_trace=false)
+	#standardize
+	c = mu * (1 - M)
+	Sc = vopp.comp_Sc(S, M)
+	mode_c = (mode - c) / (mu - c)
+
+	#create subfunctions
+	v0 = (phat - 1)/M + 1
+	h(t) = t >= v0 ? 1. - q : -q
+
+	#H(t) = int_[t, mode_c] h
+	#lazy implementation.
+	function H(t)
+		quadgk(h, t, 1, mode_c)[1]
+	end
+
+	#return maximizers of 
+	#max_{[pk, pk_p]}  at + bt^2 + c H(t)
+	function sep_fun(a, b, c, mode, pk, pk_p)
+		obj(t) = a * t + b * t^2 + c * H(t)
+
+		#check endpoints
+		tstar, val = pk, obj(pk)
+		if obj(pk_p) > val
+			tstar = pk_p
+			val = obj(pk_p)
+		end
+
+		#handle degenerate case where c == 0
+		if c == 0.
+			tp = -a/2/b		
+			if pk <= tp <= pk_p
+				if obj(tp) >= val
+					tstar, val = tp, obj(tp)
+				end
+			end
+			return val, tstar
+		end
+
+		#else real work to be done
+		#check the two possible critical points
+		if b != 0
+			t1 = c/2/b * (1 - q - a/c)
+			if t1 >= v0 && (pk <= t1 < pk_p)
+				if obj(t1) >= val
+					val = obj(t1)
+					tstar = t1
+				end
+			end
+
+			t0 = -c/2/b * (q + a/c)
+			if t0 < v0 && (pk <= t0 < pk_p)
+				if obj(t0) >= val
+					val = obj(t0)
+					tstar = t0
+				end
+			end
+		end
+		return val, tstar
+	end  #end definition of separator
 
 	#Now kick it off!	   
 	return _vopp_unimodal(Sc, mode_c, h, H, sep_fun, N=N, numCuts=numCuts, print_trace=print_trace)

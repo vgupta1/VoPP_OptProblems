@@ -86,4 +86,48 @@ end
 
 
 
+#Approximately computes the minimum and maximal valid q for distn
+#assumes it is standardized
+function min_max_q_IC_uni(S, mode, v0, supp_size=100)
+    
+    function G(p, m, t)
+        if p > max(m, t)
+            return 0.
+        elseif p < min(m, t)
+            return 1.
+        elseif m == t
+            return m >= p ? 1. : 0.
+        end
+        return (max(m, t) - p) / abs(m-t)       
+    end
+   
+    m = Model(solver=GurobiSolver(OutputFlag=false))
+    
+    t_grid = range(0, stop=S, length=supp_size)
+    
+    @variable(m, ws[1:supp_size] >= 0)
+    @constraint(m, sum(ws) == 1)
+    @constraint(m, sum(ws[i] * (mode + t_grid[i])/2 for i = 1:supp_size) == 1)
+    @objective(m, Min, sum(ws[i] * G(v0, mode, t_grid[i]) for i = 1:supp_size))
 
+    status = solve(m) 
+    @assert status == :Optimal
+    minq = getobjectivevalue(m)
+
+    @objective(m, Max, sum(ws[i] * G(v0, mode, t_grid[i]) for i = 1:supp_size))
+
+    status = solve(m) 
+    @assert status == :Optimal
+    maxq = getobjectivevalue(m)
+    return minq, maxq        
+end
+
+
+function min_max_q_IC_uni(S, M, mu, mode, phat, supp_size=100)
+    c = mu * (1 - M)
+    Sc = vopp.comp_Sc(S, M)
+    mode_c = (mode - c) / (mu - c)
+    v0 = (phat - 1)/ M + 1
+    return min_max_q_IC_uni(Sc, mode_c, v0, supp_size)
+
+end        

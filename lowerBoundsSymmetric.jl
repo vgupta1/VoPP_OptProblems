@@ -72,7 +72,7 @@ function vopp_lb_symmetric_MAD(mu, S, M, D; delta = S/100, numCuts=100, print_tr
 	@assert Sc > 1 "Scale $S is too small for any distribution"
 
 	if D/M > .25 
-		println("Deviation $D > .25, problem likely infeasible")
+		println("Deviation $(D/M) > .25, problem likely infeasible")
 		if safe_fail 
 			println("Safe_fail set to true. Aborting Calc")
 			return -1.0
@@ -149,7 +149,7 @@ function vopp_lb_symmetric_CV(mu, S, M, C; delta = S/100, numCuts=100, print_tra
 
 	max_cv = max_std_cv_unimodal_guess(1, Sc, M, true) 
 	if  C / M > max_cv
-		println("CV $C > $max_cv, so problem likely infeasible")
+		println("CV $(C/M) > $max_cv, so problem likely infeasible")
 		if safe_fail 
 			println("Safe_fail set to true. Aborting Calc")
 			return -1.0

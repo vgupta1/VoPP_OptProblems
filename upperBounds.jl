@@ -65,6 +65,9 @@ function sep_GM(a, b, lam1, lam2, M, mu, B)
 	return -1., -1.	
 end
 
+
+
+
 #### Functions based on a generic separation argument 
 #h 1d function that represents moment constraint (includes moment):  E[h(V)] = 0
 #sep_fun(a, b, lam1, lam2, M, mu) maximizes of lam1 * v  + lam2 h(mu * (Mv + 1-M) ).  returns optval, vstar
@@ -281,11 +284,6 @@ function _vopp_CV_SLemma(S, M, mu, C, N)
 	return 1/getobjectivevalue(m)
 end
 
-
-
-
-
-
 ### Specialized function for BM
 # useSep determines use separator or else Reformulation 
 function vopp_ub_GM(S, M, mu, B; useSep=false, N=500, numCuts=100, TOL=1e-6, print_trace=false)
@@ -359,3 +357,49 @@ function _vopp_ub_GM(S, M, mu, B, is_lam2_pos, N)
 
 	return 1/getobjectivevalue(m)
 end
+
+#h(t) = I( V >= phat mu) - q
+#hbar(t) = I( t >= v0) - q where v0 = (phat -1)/M + 1
+#sep_fun(a, b, lam1, lam2, M, mu) maximizes of lam1 * v  + lam2 hbar(mu * (Mv + 1-M) ).  returns optval, vstar
+function sep_IC(a, b, lam1, lam2, M, mu, phat, q; tol=1e-10)
+	v0 = (phat - 1)/M + 1
+	lhs(v) =  v >= v0 ? lam1 * v + lam2 * (1 - q) : lam1 * v - lam2 * q
+
+	#check end points
+	tstar = a
+	val = lhs(tstar)
+
+	if lhs(b) > val
+		tstar = b
+		val = lhs(tstar)
+	end
+
+	if a <= v0 < b
+		if lam2 >= 0
+			#check v0
+			if lhs(v0) > val
+				tstar = v0
+				val = lhs(tstar)
+			end
+		else #lam2 < 0
+			#check v0-tol
+			if lhs(v0 -tol) > val
+				tstar = v0-tol
+				val = lhs(tstar)
+			end
+		end
+	end
+	val, tstar
+end
+
+### Specialized function for Incumbent Price
+function vopp_ub_IC(S, M, mu, phat, q; N=500,numCuts=100, TOL=1e-6, print_trace=false)
+	v0 = (phat - 1)/M + 1
+	h(v) = v >= v0 ?  1 - q : -q 
+	sep_fun(a, b, lam1, lam2, M, mu) = sep_IC(a, b, lam1, lam2, M, mu, phat, q)
+	return _vopp_moment_dual(S, M, mu, h, sep_fun, N=N, numCuts=numCuts, TOL=TOL, print_trace=print_trace)
+end
+
+
+
+
