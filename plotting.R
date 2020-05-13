@@ -60,7 +60,6 @@ dev.off()
 ###############
 # Similar Crap for CV
 ###############
-dat = read_tsv("Results/outCV__2_1_1_1.tab")
 dat = read_tsv("Results/outCV2__2_0.9_1_1.tab")
 
 
@@ -105,7 +104,7 @@ dat.labels <-
           .5, 2.72, "Thm. 6",
           .5, 2.3, "Thm. 7", 
           .5, 1.5, "Thm. 8", 
-          .5, 1.05, "Ex. 1"
+          .5, 1.05, "Ex. EC.1"
   )
 
 g<-   g + geom_text(aes(Dev, Bound, label=Label), 
@@ -151,8 +150,7 @@ g <-
   scale_y_continuous(limits=c(NA, 3.2)) +
     theme(legend.position=c(.7, .8), 
         legend.title=element_blank(), 
-        legend.text=element_text(size=6), 
-        element_rect(fill="transparent")) +
+        legend.text=element_text(size=6)) +
   xlab("(c) Geometric Mean $B$") +
   ylab("Bound on $\\mathcal{R}_{PP} / \\mathcal{R}_{SP}$")
 
@@ -163,7 +161,7 @@ dat.labels <-
           .85, 2.85, "Thm. 6",
           .85, 2.25, "Thm. 7", 
           .85, 1.85, "Thm. 8", 
-          .85, 1.05, "Ex. 1"
+          .85, 1.05, "Ex. EC.2"
   )
 
 g <- g + geom_text(aes(Dev, Bound, label=Label), 
@@ -204,7 +202,7 @@ g <-
   theme(legend.position=c(.7, .8), 
         legend.title=element_blank(), 
         legend.text=element_text(size=6)) +
-  xlab("(d) Fraction of Market $q$ at Incumbent Price $\\hat{p} \\mu$") +
+  xlab("(d) Fraction of Market $q$") +
   ylab("Bound on $\\mathcal{R}_{PP} / \\mathcal{R}_{SP}$")
 
 g
@@ -213,7 +211,7 @@ dat.labels <-
   tribble(~Dev, ~Bound, ~Label, 
           .8, 1.8, "Thm. 6",
           .8, 1.5, "Thm. 7", 
-          .8, 1.25, "Thm. 8", 
+          .9, 1.25, "Thm. 8", 
           .8, 1.05, "Ex. EC.3"
   )
 
